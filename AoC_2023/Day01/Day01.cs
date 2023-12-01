@@ -49,11 +49,28 @@ namespace AoC_2023
 
         public static int Day01_Part2(Day01_Input input)
         {
-            var modifiedInput = new List<string>();
-            modifiedInput = input.Select(f => f.Replace("one", "o1e").Replace("two", "t2o").Replace("three", "o3").Replace("four", "4").Replace("five", "5e").Replace("six", "6").Replace("seven", "7n").Replace("eight", "e8t").Replace("nine", "n9e")).ToList();
-            char[] nums = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
-            return modifiedInput.Sum(f =>
-                       int.Parse(string.Concat(f[f.IndexOfAny(nums)], f[f.LastIndexOfAny(nums)])));
+            var numbers = new Dictionary<string, char>
+            {
+                ["one"] = '1',
+                ["two"] = '2',
+                ["three"] = '3',
+                ["four"] = '4',
+                ["five"] = '5',
+                ["six"] = '6',
+                ["seven"] = '7',
+                ["eight"] = '8',
+                ["nine"] = '9'
+            };
+
+            return input.Select(f =>
+            {
+                foreach (var num in numbers)
+                {
+                    f = f.Replace(num.Key, num.Key + num.Value + num.Key);
+                }
+                return f;
+            }).Sum(f =>
+                     int.Parse(string.Concat(f[f.IndexOfAny(numbers.Values.ToArray())], f[f.LastIndexOfAny(numbers.Values.ToArray())])));
         }
     }
     public class Day01_Test
