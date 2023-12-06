@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace AoC_2023
 {
     public static class Day06
     {
-        public class Day06_Input : List<string> //Define input type
+        public class Day06_Input : List<(long time, long distance)> //Define input type
         {
         }
         public static void Day06_Main()
@@ -30,24 +31,63 @@ namespace AoC_2023
 
             var result = new Day06_Input();
 
-            foreach (string line in rawinput.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).Select(s => s.Trim()))
+            var lines = rawinput.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).Select(s => s.Trim()).ToList();
+            var times = lines[0].Split(':')[1].Trim().Split(' ').Where(f=>f!="").Select(f=>long.Parse(f)).ToList();
+            var distances = lines[1].Split(':')[1].Trim().Split(' ').Where(f => f != "").Select(f => long.Parse(f)).ToList();
+
+            for(var i=0;i<times.Count; i++)
             {
-                //result.Add(line);
+                result.Add(new(times[i], distances[i]));
             }
 
             return result;
         }
 
 
-        public static int Day06_Part1(Day06_Input input)
+        public static long Day06_Part1(Day06_Input input)
         {
+            //d = x*(t-x) => x^2-tx+d = 0
+            long result = 1;
 
-            return 0;
+            foreach(var race in input)
+            {
+                long a = 1;
+                long b = -1 * race.time;
+                long c = race.distance;
+                var D = Math.Pow(b, 2) - 4 * a * c;
+                if (D < 0)
+                { //no result
+                    result *= 0;
+                    Debug.Print("no solution for one race");
+                    continue;
+                }
+
+                var x1 = (-b - Math.Sqrt(D)) / (2 * a);
+                var x2 = (-b + Math.Sqrt(D)) / (2 * a);
+
+                Debug.Assert(x1 <= x2);
+
+                var subresult = (long)Math.Floor(x2) - (long)Math.Ceiling(x1) +1;
+                if ((long)Math.Floor(x2) == x2) subresult--;
+                if ((long)Math.Ceiling(x1) == x1) subresult--;
+                result *= subresult;
+            }
+
+            return result;
         }
 
-        public static int Day06_Part2(Day06_Input input)
+        public static long Day06_Part2(Day06_Input input)
         {
-            return 0;
+            var timestring = "";
+            var distancestring = "";
+            foreach(var race in input)
+            {
+                timestring += race.time.ToString();
+                distancestring += race.distance.ToString();
+            }
+            var newInput = new Day06_Input();
+            newInput.Add(new(long.Parse(timestring), long.Parse(distancestring)));
+            return Day06_Part1(newInput);
         }
 
 
@@ -55,14 +95,14 @@ namespace AoC_2023
     public class Day06_Test
     {
         [Theory]
-        [InlineData("ABC", 0)]
+        [InlineData("Time:      7  15   30\r\nDistance:  9  40  200", 288)]
         public static void Day06Part1Test(string rawinput, int expectedValue)
         {
             Assert.Equal(expectedValue, Day06.Day06_Part1(Day06.Day06_ReadInput(rawinput)));
         }
 
         [Theory]
-        [InlineData("ABC", 0)]
+        [InlineData("Time:      7  15   30\r\nDistance:  9  40  200", 71503)]
         public static void Day06Part2Test(string rawinput, int expectedValue)
         {
             Assert.Equal(expectedValue, Day06.Day06_Part2(Day06.Day06_ReadInput(rawinput)));
