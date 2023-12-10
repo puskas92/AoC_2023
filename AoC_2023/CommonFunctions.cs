@@ -23,5 +23,13 @@ namespace AoC_2023
         {
             return (a / gcf(a, b)) * b;
         }
+
+        public static List<(int X, int Y)> CrossDirections = new List<(int X, int Y)>
+        {
+            new (1,0),
+            new (0, -1),
+            new (-1, 0),
+            new (0,1)
+        };
     }
 }
