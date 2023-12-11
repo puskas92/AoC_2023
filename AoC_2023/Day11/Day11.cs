@@ -11,14 +11,14 @@ namespace AoC_2023
 {
     public static class Day11
     {
-        public class Day11_Input : List<string> //Define input type
+        public class Day11_Input : List<(int X,int Y)> //Define input type
         {
         }
         public static void Day11_Main()
         {
             var input = Day11_ReadInput();
-            Console.WriteLine($"Day11 Part1: {Day11_Part1(input)}");
-            Console.WriteLine($"Day11 Part2: {Day11_Part2(input)}");
+            Console.WriteLine($"Day11 Part1: {Day11_Part1(input,2)}");
+            Console.WriteLine($"Day11 Part2: {Day11_Part2(input, 1000000)}");
         }
 
         public static Day11_Input Day11_ReadInput(string rawinput = "")
@@ -30,24 +30,52 @@ namespace AoC_2023
 
             var result = new Day11_Input();
 
+            var i = 0;
             foreach (string line in rawinput.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).Select(s => s.Trim()))
             {
-                //result.Add(line);
+                var j = -1;
+                while (true)
+                {
+                    j = line.IndexOf('#', j+1);
+                    if (j == -1) break;
+                    result.Add(new(i, j));
+                }
+                i++;
             }
 
             return result;
         }
 
 
-        public static int Day11_Part1(Day11_Input input)
+        public static long Day11_Part1(Day11_Input input, int scale)
         {
+            long sum = 0;
 
-            return 0;
+            var rows = input.Select(f => f.X).Distinct().ToList();
+            var columns = input.Select(f=> f.Y).Distinct().ToList();
+
+            for(var i = 0; i< input.Count-1; i++)
+            {
+                for(var j = i+1; j<input.Count; j++)
+                {
+                    sum += Math.Abs(input[i].X - input[j].X) + Math.Abs(input[i].Y - input[j].Y);
+                    for(var k = Math.Min(input[i].X, input[j].X) +1; k < Math.Max(input[i].X, input[j].X); k++)
+                    {
+                        if (!rows.Contains(k)) sum+=(scale-1);
+                    }
+                    for (var k = Math.Min(input[i].Y, input[j].Y) + 1; k < Math.Max(input[i].Y, input[j].Y); k++)
+                    {
+                        if (!columns.Contains(k)) sum+=(scale-1);
+                    }
+                }
+            }
+
+            return sum;
         }
 
-        public static int Day11_Part2(Day11_Input input)
+        public static long Day11_Part2(Day11_Input input, int scale)
         {
-            return 0;
+            return Day11_Part1(input, scale);
         }
 
 
@@ -55,17 +83,18 @@ namespace AoC_2023
     public class Day11_Test
     {
         [Theory]
-        [InlineData("ABC", 0)]
-        public static void Day11Part1Test(string rawinput, int expectedValue)
+        [InlineData("...#......\r\n.......#..\r\n#.........\r\n..........\r\n......#...\r\n.#........\r\n.........#\r\n..........\r\n.......#..\r\n#...#.....",2, 374)]
+        public static void Day11Part1Test(string rawinput, int scale, int expectedValue)
         {
-            Assert.Equal(expectedValue, Day11.Day11_Part1(Day11.Day11_ReadInput(rawinput)));
+            Assert.Equal(expectedValue, Day11.Day11_Part1(Day11.Day11_ReadInput(rawinput), scale));
         }
 
         [Theory]
-        [InlineData("ABC", 0)]
-        public static void Day11Part2Test(string rawinput, int expectedValue)
+        [InlineData("...#......\r\n.......#..\r\n#.........\r\n..........\r\n......#...\r\n.#........\r\n.........#\r\n..........\r\n.......#..\r\n#...#.....",10, 1030)]
+        [InlineData("...#......\r\n.......#..\r\n#.........\r\n..........\r\n......#...\r\n.#........\r\n.........#\r\n..........\r\n.......#..\r\n#...#.....", 100, 8410)]
+        public static void Day11Part2Test(string rawinput,int scale, int expectedValue)
         {
-            Assert.Equal(expectedValue, Day11.Day11_Part2(Day11.Day11_ReadInput(rawinput)));
+            Assert.Equal(expectedValue, Day11.Day11_Part2(Day11.Day11_ReadInput(rawinput), scale));
         }
     }
 }
