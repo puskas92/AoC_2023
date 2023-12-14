@@ -32,6 +32,54 @@ namespace AoC_2023
                         }
                     }
                 }
+
+                if (dir.X == 1 && dir.Y == 0)
+                {
+                    for (int i = map.Keys.Max(); i >= 0; i--)
+                    {
+                        for (int j = 0; j <= map[i].Keys.Max(); j++)
+                        {
+                            if (map[i][j] != 'O') continue;
+                            int k = i + 1;
+                            while (map.ContainsKey(k) && map[k][j] == '.')
+                            { k++; }
+                            map[i][j] = '.';
+                            map[k - 1][j] = 'O';
+                        }
+                    }
+                }
+
+                if (dir.X == 0 && dir.Y == -1)
+                {
+                    for (int i = 0; i <= map[0].Keys.Max(); i++)
+                    {
+                        for (int j = 0; j <= map.Keys.Max(); j++)
+                        {
+                            if (map[j][i] != 'O') continue;
+                            int k = i - 1;
+                            while (map.ContainsKey(k) && map[k][i] == '.')
+                            { k--; }
+                            map[j][i] = '.';
+                            map[k+1][i] = 'O';
+                        }
+                    }
+                }
+
+                if (dir.X == 0 && dir.Y == 1)
+                {
+                    for (int i = map[0].Keys.Max(); i >= 0; i--)
+                    {
+                        for (int j = 0; j <= map.Keys.Max(); j++)
+                        {
+                            if (map[j][i] != 'O') continue;
+                            int k = i+ 1;
+                            while (map.ContainsKey(k) && map[k][i] == '.')
+                            { k++; }
+                            map[j][i] = '.';
+                            map[k-1][i] = 'O';
+                        }
+                    }
+                }
             }
 
             public int NorthSupportScore()
@@ -92,7 +140,31 @@ namespace AoC_2023
 
         public static int Day14_Part2(Day14_Input input)
         {
-            return 0;
+            var dirList = new List<(int X, int Y)>()
+            {
+                new(-1,0),
+                new(0,-1),
+                new(1,0),
+                new(0,1)
+            };
+            var scoreList = new List<int>();
+            var iterateNumber = 1000000000;
+            for (int i = 0; i<= iterateNumber; i++)
+            {
+                foreach(var dir in dirList)
+                {
+                    input.MoveToDir(dir);
+                }
+                var currentScore = input.NorthSupportScore();
+                if (scoreList.Contains(currentScore))
+                {
+                    var repeatCycle = scoreList.IndexOf(currentScore) - i;
+                    i = (iterateNumber - i) % repeatCycle; 
+                }
+                scoreList.Add(currentScore);
+            }
+
+            return input.NorthSupportScore();
         }
 
 
