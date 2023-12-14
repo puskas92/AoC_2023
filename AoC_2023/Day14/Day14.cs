@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.XPath;
-using Xunit;
-
+﻿
 namespace AoC_2023
 {
     public static class Day14
@@ -57,10 +49,10 @@ namespace AoC_2023
                         {
                             if (map[j][i] != 'O') continue;
                             int k = i - 1;
-                            while (map.ContainsKey(k) && map[k][i] == '.')
+                            while (map[j].ContainsKey(k) && map[j][k] == '.')
                             { k--; }
                             map[j][i] = '.';
-                            map[k+1][i] = 'O';
+                            map[j][k + 1] = 'O';
                         }
                     }
                 }
@@ -73,10 +65,10 @@ namespace AoC_2023
                         {
                             if (map[j][i] != 'O') continue;
                             int k = i+ 1;
-                            while (map.ContainsKey(k) && map[k][i] == '.')
+                            while (map[j].ContainsKey(k) && map[j][k] == '.')
                             { k++; }
                             map[j][i] = '.';
-                            map[k-1][i] = 'O';
+                            map[j][k-1] = 'O';
                         }
                     }
                 }
@@ -96,6 +88,33 @@ namespace AoC_2023
                     }
                 }
                 return score;
+            }
+
+            //public int EastSupportScore()
+            //{
+            //    var score = 0;
+            //    for (int i = 0; i <= map.Keys.Max(); i++)
+            //    {
+            //        for (int j = 0; j <= map[i].Keys.Max(); j++)
+            //        {
+            //            if (map[i][j] == 'O')
+            //            {
+            //                score += j;
+            //            }
+            //        }
+            //    }
+            //    return score;
+            //}
+
+            public int Hash()
+            {
+                long result = 0;
+                foreach(var row in map)
+                {
+                    result += string.Concat(row.Value.ToArray()).GetHashCode();
+                    result = result % (int.MaxValue);
+                }
+                return (int)result;
             }
         }
         public static void Day14_Main()
@@ -147,21 +166,28 @@ namespace AoC_2023
                 new(1,0),
                 new(0,1)
             };
-            var scoreList = new List<int>();
+            var scoreList = new List<int>(); // new List<(int,int)>();
             var iterateNumber = 1000000000;
-            for (int i = 0; i<= iterateNumber; i++)
+            var repeatCycleFound = false;
+            for (int i = 0; i< iterateNumber; i++)
             {
                 foreach(var dir in dirList)
                 {
                     input.MoveToDir(dir);
                 }
-                var currentScore = input.NorthSupportScore();
-                if (scoreList.Contains(currentScore))
+                if (!repeatCycleFound)
                 {
-                    var repeatCycle = scoreList.IndexOf(currentScore) - i;
-                    i = (iterateNumber - i) % repeatCycle; 
+                    //(int, int) currentScore = new(input.NorthSupportScore(), input.EastSupportScore());
+                    var currentScore = input.Hash();
+
+                    if (scoreList.Contains(currentScore))
+                    {
+                        var repeatCycle = i - scoreList.IndexOf(currentScore);
+                        i +=(int)(Math.Floor((double)(iterateNumber - i) / repeatCycle) * repeatCycle);
+                        repeatCycleFound = true;
+                    }
+                    scoreList.Add(currentScore);
                 }
-                scoreList.Add(currentScore);
             }
 
             return input.NorthSupportScore();
