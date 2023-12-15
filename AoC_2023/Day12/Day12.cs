@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -67,6 +68,7 @@ namespace AoC_2023
                 if (!IsMatch(SpringPackage, pattern)) return 0;
                 else
                 {
+                    if (SpringPackage.Trim('.').All(f => f == '?')) return CalculatePossibleArrengementAllQuestion(SpringPackage.Trim('.').Length, GroupOfDamagedSprings);
                     var placeOfQuestionMark = SpringPackage.IndexOf('?');
                     if (placeOfQuestionMark == -1) return 1;
                     else
@@ -81,6 +83,20 @@ namespace AoC_2023
                         return result;
                     }
                 }
+            }
+
+            public static long CalculatePossibleArrengementAllQuestion(int numberOfQuestionMarks, List<int> GroupOfDamagedSprings)
+            {
+                //var count = GroupOfDamagedSprings.Count();
+                //var shortlength = numberOfQuestionMarks - GroupOfDamagedSprings.Sum() + count;
+                //var result = shortlength - (count - 1);
+                //if(result<=0) return 0;
+                //for(var i = 2; i<= count; i++)
+                //{
+                //    result*=
+                //}
+                return 0;
+
             }
 
             public static bool IsMatch(string SpringPackage, string pattern)
