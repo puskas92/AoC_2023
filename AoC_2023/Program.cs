@@ -16,7 +16,7 @@ sw.Start();
 //Day09.Day09_Main();
 //Day10.Day10_Main();
 //Day11.Day11_Main();
-//Day12.Day12_Main();
+Day12.Day12_Main();
 //Day13.Day13_Main();
 //Day14.Day14_Main();
 //Day15.Day15_Main();

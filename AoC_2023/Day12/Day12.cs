@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -48,18 +49,18 @@ namespace AoC_2023
                     GroupOfDamagedSpringsToTest.AddRange(GroupOfDamagedSprings);
                 }
                 var pattern = CalculatePattern(GroupOfDamagedSpringsToTest);
-                foreach(var group in GroupOfDamagedSprings)
-                {
-                    var subPattern = @"(\.|\?)*";
-                    subPattern += @"(#|\?){" + group.ToString() + @"}(\.|\?)*";
-                    //subPattern += @")";
-                    var matches = Regex.Matches(SpringPackageToTest, subPattern);
-                    if(matches.Count == 5)
-                    {
-                        Console.WriteLine("Heureka");
-                    }
-                }
 
+                //foreach(var group in GroupOfDamagedSprings)
+                //{
+                //    var subPattern = @"(\.|\?)*";
+                //    subPattern += @"(#|\?){" + group.ToString() + @"}(\.|\?)*";
+                //    //subPattern += @")";
+                //    var matches = Regex.Matches(SpringPackageToTest, subPattern);
+                //    if(matches.Count == 5)
+                //    {
+                //        Console.WriteLine("Heureka");
+                //    }
+                //}
                 return CalculatePossibleArrengement(SpringPackageToTest, GroupOfDamagedSpringsToTest, pattern);
             }
 
@@ -87,16 +88,31 @@ namespace AoC_2023
 
             public static long CalculatePossibleArrengementAllQuestion(int numberOfQuestionMarks, List<int> GroupOfDamagedSprings)
             {
-                //var count = GroupOfDamagedSprings.Count();
-                //var shortlength = numberOfQuestionMarks - GroupOfDamagedSprings.Sum() + count;
-                //var result = shortlength - (count - 1);
-                //if(result<=0) return 0;
-                //for(var i = 2; i<= count; i++)
-                //{
-                //    result*=
-                //}
-                return 0;
+                var count = GroupOfDamagedSprings.Count();
+                var shortlength = numberOfQuestionMarks - GroupOfDamagedSprings.Sum() + count;
+                return CalculatePossibleArrengementAllQuestionSimplified(shortlength, count);
 
+            }
+
+            public static Dictionary<(int, int), long> AllQuestionMarkCache = new Dictionary<(int, int), long>();
+
+            public static long CalculatePossibleArrengementAllQuestionSimplified(int numberOfQuestionMarks, int numberOfSpring)
+            {
+                //this is almost working
+                //if (numberOfQuestionMarks <= 0 || numberOfSpring <= 0) return 0;
+                //var check = numberOfQuestionMarks - ((numberOfSpring * 2) - 1);
+                //if (check < 0) return 0;
+                //if (check == 0) return 1;
+
+                //double result = 1;
+                //for (int i = 0; i < numberOfSpring; i++)
+                //{
+                //    result *= (double)(numberOfQuestionMarks - (numberOfSpring - 1) - i) / (numberOfSpring - i);
+                //}
+                //return (int)result;
+
+                return 0;
+                
             }
 
             public static bool IsMatch(string SpringPackage, string pattern)
@@ -152,7 +168,14 @@ namespace AoC_2023
 
         public static long Day12_Part2(Day12_Input input)
         {
-            return input.Sum(f => f.CalculatePossibleArrengementWithSelfPart2());
+            //return input.Sum(f => f.CalculatePossibleArrengementWithSelfPart2());
+            long result = 0;
+            for(var i= 0; i < input.Count; i++)
+            {
+                Console.WriteLine(i);
+                result += input[i].CalculatePossibleArrengementWithSelfPart2();
+            }
+            return result;
         }
 
 
@@ -160,6 +183,7 @@ namespace AoC_2023
     public class Day12_Test
     {
         [Theory]
+        [InlineData("????????? 1,1,3\r\n...?????????..... 1,1,3\r\n??????? 1,1,1\r\n?????????? 2,1,3\r\n???? 1,1\r\n???????????? 1,1,1\r\n?????????????? 1,1,1\r\n?????????????? 1,1,1,1\r\n?????????????? 1,1,1,1,1", 965)]
         [InlineData("???.### 1,1,3\r\n.??..??...?##. 1,1,3\r\n?#?#?#?#?#?#?#? 1,3,1,6\r\n????.#...#... 4,1,1\r\n????.######..#####. 1,6,5\r\n?###???????? 3,2,1", 21)]
         public static void Day12Part1Test(string rawinput, int expectedValue)
         {
