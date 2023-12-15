@@ -66,10 +66,10 @@ namespace AoC_2023
 
             public static long CalculatePossibleArrengement(string SpringPackage, List<int> GroupOfDamagedSprings, string pattern)
             {
+                if (SpringPackage.Trim('.').All(f => f == '?')) return CalculatePossibleArrengementAllQuestion(SpringPackage.Trim('.').Length, GroupOfDamagedSprings);
                 if (!IsMatch(SpringPackage, pattern)) return 0;
                 else
-                {
-                    if (SpringPackage.Trim('.').All(f => f == '?')) return CalculatePossibleArrengementAllQuestion(SpringPackage.Trim('.').Length, GroupOfDamagedSprings);
+                { 
                     var placeOfQuestionMark = SpringPackage.IndexOf('?');
                     if (placeOfQuestionMark == -1) return 1;
                     else
@@ -98,12 +98,17 @@ namespace AoC_2023
 
             public static long CalculatePossibleArrengementAllQuestionSimplified(int numberOfQuestionMarks, int numberOfSpring)
             {
-                //this is almost working
-                //if (numberOfQuestionMarks <= 0 || numberOfSpring <= 0) return 0;
-                //var check = numberOfQuestionMarks - ((numberOfSpring * 2) - 1);
-                //if (check < 0) return 0;
-                //if (check == 0) return 1;
 
+                if (numberOfQuestionMarks <= 0 || numberOfSpring <= 0) return 0;
+                if (numberOfSpring == 1) return numberOfQuestionMarks;
+                var check = numberOfQuestionMarks - ((numberOfSpring * 2) - 1);
+                if (check < 0) return 0;
+                if (check == 0) return 1;
+                (int, int) cacheKey = new(numberOfQuestionMarks, numberOfSpring);
+                if (AllQuestionMarkCache.ContainsKey(cacheKey)) return AllQuestionMarkCache[cacheKey];
+                long result = 0;
+
+                //this is almost working
                 //double result = 1;
                 //for (int i = 0; i < numberOfSpring; i++)
                 //{
@@ -111,13 +116,19 @@ namespace AoC_2023
                 //}
                 //return (int)result;
 
-                return 0;
+                for(var i= 0; i< numberOfQuestionMarks; i++)
+                {
+                    result += CalculatePossibleArrengementAllQuestionSimplified(numberOfQuestionMarks - 2 - i, numberOfSpring - 1);
+                }
+
+                AllQuestionMarkCache.Add(cacheKey, result);
+                return result;
                 
             }
 
             public static bool IsMatch(string SpringPackage, string pattern)
             {
-
+                //very slow for some inputs in Part2
                 return Regex.Match(SpringPackage, pattern).Success;
             }
 
