@@ -183,8 +183,9 @@ namespace AoC_2023
             long result = 0;
             for(var i= 0; i < input.Count; i++)
             {
-                Console.WriteLine(i);
+                Console.Write(i);
                 result += input[i].CalculatePossibleArrengementWithSelfPart2();
+                Console.WriteLine(" - " + result);
             }
             return result;
         }

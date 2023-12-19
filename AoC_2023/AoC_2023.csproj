@@ -7,6 +7,7 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <StartupObject></StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -56,6 +57,7 @@
     <None Remove="Day16\Day16_input.txt" />
     <None Remove="Day17\Day17_input.txt" />
     <None Remove="Day18\Day18_input.txt" />
+    <None Remove="Day19\Day19_input.txt" />
   </ItemGroup>
 
 </Project>
