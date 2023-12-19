@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 using System.Xml.XPath;
 using Xunit;
@@ -21,33 +22,68 @@ namespace AoC_2023
             public Dictionary<string, Day19_Workflow> workflows = new Dictionary<string, Day19_Workflow>();
             public List<Day19_PartRating> parts = new List<Day19_PartRating>();
 
-
-            //private Dictionary<(string, Day19_PartRating), bool> _RuleEvaluateCache = new Dictionary<(string, Day19_PartRating), bool>();
             public bool EvaluateRule(string ruleName, Day19_PartRating partRating)
             {
-               // (string, Day19_PartRating) cacheKey = new(ruleName, partRating);
-               // if (_RuleEvaluateCache.ContainsKey(cacheKey)) return _RuleEvaluateCache[cacheKey];
-
                 foreach (var rule in workflows[ruleName].rules)
                 {
                     var outcome = rule.CalculateOutcome(partRating);
                     switch (outcome)
                     {
-                        case "A":
-                            //_RuleEvaluateCache.Add(cacheKey, true);
-                            return true;
-                        case "R":
-                            //_RuleEvaluateCache.Add(cacheKey, false);
-                            return false;
+                        case "A": return true;
+                        case "R": return false;
                         case "": continue;
-                        default:
-                            var result = EvaluateRule(outcome, partRating);
-                            //_RuleEvaluateCache.Add(cacheKey, result);
-                            return result;
+                        default: return EvaluateRule(outcome, partRating);
                     }
                 }
-                Debug.Print("Should not get to this point");
-                return false;
+                throw new UnreachableException();
+            }
+
+            public long EvaluateRuleWithRanges(string ruleName, Dictionary<char, (int lower, int upper)> ranges)
+            {
+                long result = 0;
+                var modifiedMainRange = new Dictionary<char, (int lower, int upper)>(ranges);
+                foreach (var rule in workflows[ruleName].rules)
+                {
+                    if(rule.operation == 'n')
+                    {
+                        if (rule.yesOutcome == "A") result += CalculateNumberOfAccepted(modifiedMainRange);
+                        else if (rule.yesOutcome == "R") continue;
+                        else result += EvaluateRuleWithRanges(rule.yesOutcome, modifiedMainRange);
+                        continue;
+                    }
+
+                    var modifiedSubRange = new Dictionary<char, (int lower, int upper)>(modifiedMainRange);
+                   
+                    if(rule.operation == '<')
+                    {
+                        var upper =  Math.Min(modifiedSubRange[rule.conditionParam].upper, rule.toCompareNum - 1);
+                        modifiedSubRange[rule.conditionParam] = (modifiedSubRange[rule.conditionParam].lower, upper);
+                        modifiedMainRange[rule.conditionParam] = (upper+1 ,modifiedMainRange[rule.conditionParam].upper);
+
+                    }
+                    else
+                    {
+                        var lower = Math.Max(modifiedSubRange[rule.conditionParam].lower, rule.toCompareNum +1);
+                        modifiedSubRange[rule.conditionParam] = (lower, modifiedSubRange[rule.conditionParam].upper);
+                        modifiedMainRange[rule.conditionParam] = (modifiedMainRange[rule.conditionParam].lower, lower -1); 
+                    }
+
+                    if (rule.yesOutcome == "A") result += CalculateNumberOfAccepted(modifiedSubRange);
+                    else if (rule.yesOutcome == "R") continue;
+                    else result += EvaluateRuleWithRanges(rule.yesOutcome, modifiedSubRange);
+                }
+
+                return result;
+            }
+
+            private static long CalculateNumberOfAccepted(Dictionary<char, (int lower, int upper)> Ranges)
+            {
+                long result = 1;
+                foreach(var range in Ranges)
+                {
+                    result *= (range.Value.upper - range.Value.lower + 1);
+                }
+                return result;
             }
         }
         public class Day19_Workflow
@@ -178,57 +214,13 @@ namespace AoC_2023
 
         public static long Day19_Part2(Day19_Input input) //works but very slow
         {
-            var Ranges = new Dictionary<char, List<int>>() {
-                { 'x', new List<int>() { 1, 4001 }},
-                { 'm', new List<int>() { 1, 4001 }},
-                { 'a', new List<int>() { 1, 4001 }},
-                { 's', new List<int>() { 1, 4001 }}};
+            var Ranges = new Dictionary<char, (int lower, int upper)>() {
+                { 'x', (1, 4000)},
+                { 'm', (1, 4000)},
+                { 'a', (1, 4000)},
+                { 's', (1, 4000)}};
 
-            foreach (var wf in input.workflows)
-            {
-                foreach (var rule in wf.Value.rules)
-                {
-                    if (rule.operation == 'n') continue;
-                    Ranges[rule.conditionParam].Add((rule.operation == '>') ? rule.toCompareNum + 1 : rule.toCompareNum);
-                }
-            }
-
-            Ranges['x'] = Ranges['x'].Distinct().Order().ToList();
-            Ranges['m'] = Ranges['m'].Distinct().Order().ToList();
-            Ranges['a'] = Ranges['a'].Distinct().Order().ToList();
-            Ranges['s'] = Ranges['s'].Distinct().Order().ToList();
-
-
-            long result = 0;
-            for (var xi = 0; xi < Ranges['x'].Count-1; xi++)
-            {
-                long subresultM = 0;
-                var x = Ranges['x'][xi];
-                for (var mi = 0; mi < Ranges['m'].Count-1; mi++)
-                {
-                    var m = Ranges['m'][mi];
-                    long subresultA = 0;
-                    for (var ai = 0; ai < Ranges['a'].Count-1; ai++)
-                    {
-                        var a = Ranges['a'][ai];
-                        long subresultS = 0;
-                        for (var si = 0; si < Ranges['s'].Count-1; si++)
-                        {
-                            var s = Ranges['s'][si];
-                            var testPart = new Day19_PartRating(x, m, a, s);
-                            if (input.EvaluateRule("in", testPart))
-                            {
-                                subresultS += Ranges['s'][si + 1] - Ranges['s'][si] ;
-                            }
-                        }
-                        subresultA += subresultS * (Ranges['a'][ai + 1] - Ranges['a'][ai]);
-                    }
-                    subresultM += subresultA * (Ranges['m'][mi + 1] - Ranges['m'][mi]);
-                }
-                result += subresultM * (Ranges['x'][xi + 1] - Ranges['x'][xi]);
-            }
-
-
+             long result = input.EvaluateRuleWithRanges("in", Ranges);
             return result;
         }
 
