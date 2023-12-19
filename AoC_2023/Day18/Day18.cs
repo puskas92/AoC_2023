@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -17,30 +18,36 @@ namespace AoC_2023
         }
         public class Day18_Command
         {
-            public (int X, int Y) direction;
-            public int length;
-            public Color color;
+            public (int X, int Y) Part1Direction;
+            public int Part1Length;
+            public (int X, int Y) Part2Direction;
+            public int Part2Length;
 
             public Day18_Command(string raw)
             {
                 var splitted = raw.Split(' ');
                 var dirChar = splitted[0];
-                switch (dirChar.First())
+                Part1Direction = dirChar.First() switch
                 {
-                    case 'U':
-                        direction = new(-1, 0); break;
-                    case 'D':
-                        direction = new(1, 0); break;
-                    case 'L':
-                        direction = new(0, -1); break;
-                    case 'R':
-                        direction = new(0, 1); break;
-                }
+                    'U' => (-1, 0),
+                    'D' => (1, 0),
+                    'L' => (0, -1),
+                    'R' => (0, 1),
+                    _ => (0,0)
+                };
                     
                     
-                    length = int.Parse(splitted[1]);
-                int colorNum = Convert.ToInt32(splitted[2].Trim('(').Trim(')').Trim('#'), 16);
-                color = Color.FromArgb(colorNum);
+                Part1Length = int.Parse(splitted[1]);
+
+                Part2Length = Convert.ToInt32(String.Concat(splitted[2].Trim('(').Trim(')').Trim('#').SkipLast(1)), 16);
+                Part2Direction = splitted[2].Trim('(').Trim(')').Trim('#').Last() switch
+                {
+                    '3' => (-1, 0),
+                    '1' => (1, 0),
+                    '2' => (0, -1),
+                    '0' => (0, 1),
+                    _ => (0, 0)
+                };
             }
         }
         public static void Day18_Main()
@@ -68,98 +75,42 @@ namespace AoC_2023
         }
 
 
-        public static int Day18_Part1(Day18_Input input)
+        public static long Day18_Part1(Day18_Input input)
         {
-            (int X, int Y) pos = new(0, 0);
+            (long X, long Y) pos = new(0, 0);
+            (long X, long Y) nextpos;
 
-            //var diggedColumnsInRow = new Dictionary<int, List<(int column, Color color)>>();
-            //diggedColumnsInRow.Add(0, new List<(int, Color)>());
-
-
-            //foreach (var command in input)
-            //{
-            //    if(command.direction.X == 0)
-            //    {
-            //        if (!diggedColumnsInRow.ContainsKey(pos.X)) diggedColumnsInRow.Add(pos.X, new List<(int,Color)>());
-            //        diggedColumnsInRow[pos.X].Add(new (pos.Y, command.color));
-            //        pos = new(pos.X + (command.direction.X * command.length), pos.Y + (command.direction.Y*command.length));
-            //        if (!diggedColumnsInRow.ContainsKey(pos.X)) diggedColumnsInRow.Add(pos.X, new List<(int,Color)>());
-            //        diggedColumnsInRow[pos.X].Add(new (pos.Y, command.color));
-            //    }
-            //    else
-            //    {
-            //        for (var i= 1; i <= command.length; i++)
-            //        {
-            //            if(i !=0) pos = new(pos.X + command.direction.X, pos.Y + command.direction.Y);
-            //            if (i != command.length) {
-            //                if (!diggedColumnsInRow.ContainsKey(pos.X)) diggedColumnsInRow.Add(pos.X, new List<(int, Color)>());
-            //                diggedColumnsInRow[pos.X].Add(new(pos.Y, command.color));
-            //                    }
-            //        }
-            //    }
-
-            //}
-
-            //var area = 0;
-            //foreach (var row in diggedColumnsInRow)
-            //{
-            //   var orderdRow =  row.Value.OrderBy(f => f.column).ToList();
-            //    var outside = true;
-            //    var i =0;
-            //    for ( i = 0; i < orderdRow.Count - 1; i++)
-            //    {
-            //        if (orderdRow[i].color == orderdRow[i + 1].color)
-            //        {
-            //            area += orderdRow[i + 1].column - orderdRow[i].column +1;
-            //        }
-            //        else
-            //        {
-            //            if (outside)
-            //            {
-            //                area += orderdRow[i + 1].column - orderdRow[i].column + 1;
-            //            }
-            //            outside = !outside;
-            //        }
-            //    }
-            //    area -= (i-1);
-
-            //}
-            //return area;
-
-
-            var diggedPoints = new List<(int X, int Y)>();
-            diggedPoints.Add(pos);
+            long doublearea = 0;
+            long numOfPoints = 0;
             foreach (var command in input)
             {
-                for (var i = 1; i <= command.length; i++)
-                {
-                      pos = new(pos.X + command.direction.X, pos.Y + command.direction.Y);
-                      diggedPoints.Add(pos);
-                }
+                nextpos = (pos.X + (command.Part1Direction.X * command.Part1Length), pos.Y + (command.Part1Direction.Y * command.Part1Length));
+                doublearea += pos.X * nextpos.Y;
+                doublearea -= nextpos.X * pos.Y;
+                pos = nextpos;
+                numOfPoints += (command.Part1Length);
             }
-
-            diggedPoints = diggedPoints.Distinct().ToList();
-            var ToCheckList = new Queue<(int X, int Y)>();
-            ToCheckList.Enqueue((1, 1));
-            while (ToCheckList.Count > 0)
-            {
-                var ToCheck = ToCheckList.Dequeue();
-                if (diggedPoints.Contains(ToCheck)) continue;
-                diggedPoints.Add(ToCheck);
-                foreach(var dir in CommonFunctions.CrossDirections)
-                {
-                    (int X, int Y) nextPos = (ToCheck.X + dir.X, ToCheck.Y + dir.Y);
-                    if (diggedPoints.Contains(nextPos)) continue;
-                    ToCheckList.Enqueue(nextPos);
-                }
-            }
-
-            return diggedPoints.Count;
+            Debug.Assert(doublearea % 2 == 0);
+            return Math.Abs((long)(doublearea / 2)) + numOfPoints / 2 + 1;
         }
 
-        public static int Day18_Part2(Day18_Input input)
+        public static long Day18_Part2(Day18_Input input)
         {
-            return 0;
+            (long X, long Y) pos = new(0, 0);
+            (long X, long Y) nextpos;
+
+            long  doublearea = 0;
+            long numOfPoints = 0;
+            foreach (var command in input)
+            {
+                nextpos = (pos.X + (command.Part2Direction.X * command.Part2Length), pos.Y + (command.Part2Direction.Y * command.Part2Length));
+                doublearea += pos.X * nextpos.Y;
+                doublearea -= nextpos.X * pos.Y;
+                pos = nextpos;
+                numOfPoints += (command.Part2Length) ;
+            }
+            Debug.Assert(doublearea % 2 == 0);
+            return Math.Abs((long)(doublearea / 2)) + numOfPoints/2 + 1;
         }
 
 
@@ -168,14 +119,14 @@ namespace AoC_2023
     {
         [Theory]
         [InlineData("R 6 (#70c710)\r\nD 5 (#0dc571)\r\nL 2 (#5713f0)\r\nD 2 (#d2c081)\r\nR 2 (#59c680)\r\nD 2 (#411b91)\r\nL 5 (#8ceee2)\r\nU 2 (#caa173)\r\nL 1 (#1b58a2)\r\nU 2 (#caa171)\r\nR 2 (#7807d2)\r\nU 3 (#a77fa3)\r\nL 2 (#015232)\r\nU 2 (#7a21e3)", 62)]
-        public static void Day18Part1Test(string rawinput, int expectedValue)
+        public static void Day18Part1Test(string rawinput, long expectedValue)
         {
             Assert.Equal(expectedValue, Day18.Day18_Part1(Day18.Day18_ReadInput(rawinput)));
         }
 
         [Theory]
         [InlineData("R 6 (#70c710)\r\nD 5 (#0dc571)\r\nL 2 (#5713f0)\r\nD 2 (#d2c081)\r\nR 2 (#59c680)\r\nD 2 (#411b91)\r\nL 5 (#8ceee2)\r\nU 2 (#caa173)\r\nL 1 (#1b58a2)\r\nU 2 (#caa171)\r\nR 2 (#7807d2)\r\nU 3 (#a77fa3)\r\nL 2 (#015232)\r\nU 2 (#7a21e3)", 952408144115)]
-        public static void Day18Part2Test(string rawinput, int expectedValue)
+        public static void Day18Part2Test(string rawinput, long expectedValue)
         {
             Assert.Equal(expectedValue, Day18.Day18_Part2(Day18.Day18_ReadInput(rawinput)));
         }
