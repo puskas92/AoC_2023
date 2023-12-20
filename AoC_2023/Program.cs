@@ -14,17 +14,18 @@ sw.Start();
 //Day07.Day07_Main();
 //Day08.Day08_Main();
 //Day09.Day09_Main();
-//Day10.Day10_Main();
-//Day11.Day11_Main();
-//Day12.Day12_Main();
+//Day10.Day10_Main(); // could be faster
+//Day11.Day11_Main(); // could be faster
+//Day12.Day12_Main(); // need to solve
 //Day13.Day13_Main();
-//Day14.Day14_Main();
+//Day14.Day14_Main(); //could be faster
 //Day15.Day15_Main();
-//Day16.Day16_Main();
+//Day16.Day16_Main(); //could be faster
 //Day17.Day17_Main();
 //Day18.Day18_Main();
 //Day19.Day19_Main();
-Day20.Day20_Main();
+//Day20.Day20_Main();
+Day21.Day21_Main();
 sw.Stop();
 
 Console.WriteLine($"Code run under {sw.ElapsedMilliseconds}ms");
