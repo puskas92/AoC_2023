@@ -34,8 +34,9 @@ namespace AoC_2023
 
             public long CalculatePossibleArrengementWithSelfPart1()
             {
-                var pattern = CalculatePattern(GroupOfDamagedSprings);
-                return CalculatePossibleArrengement( SpringPackage, GroupOfDamagedSprings, pattern);
+                //var pattern = CalculatePattern(GroupOfDamagedSprings);
+                //return CalculatePossibleArrengement( SpringPackage, GroupOfDamagedSprings, pattern);
+                return CalculatePossibleArrengement2(SpringPackage, GroupOfDamagedSprings);
             }
 
             public long CalculatePossibleArrengementWithSelfPart2()
@@ -84,6 +85,50 @@ namespace AoC_2023
                         return result;
                     }
                 }
+            }
+
+            public static long CalculatePossibleArrengement2(string SpringPackage, List<int> GroupOfDamagedSprings)
+            {
+                if (SpringPackage.Trim('.').All(f => f == '?')) return CalculatePossibleArrengementAllQuestion(SpringPackage.Trim('.').Length, GroupOfDamagedSprings);
+                var firstGroup = GroupOfDamagedSprings.First();
+                var remainingGroupOfSprings = GroupOfDamagedSprings.Skip(1).ToList();
+
+                var remainingLength = (remainingGroupOfSprings.Count >0) ? (remainingGroupOfSprings.Sum() + remainingGroupOfSprings.Count - 1) : 0;
+
+                long result = 0;
+                for(var i = 0; i< SpringPackage.Length - firstGroup - remainingLength; i++)
+                {
+                    
+                    if (i == 0)
+                    {
+                        var pattern = @"^(#|\?){" + firstGroup.ToString() + @"}(\.|\?)$";
+                        if (Regex.Match(String.Concat(SpringPackage.Take(firstGroup + 1)), pattern).Success)
+                        {
+                            if (remainingGroupOfSprings.Count == 0) result += 1;
+                            else
+                            {
+                                var subSpringPackage = String.Concat(SpringPackage.Skip(firstGroup + 1));
+                                result += CalculatePossibleArrengement2(subSpringPackage, remainingGroupOfSprings);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var pattern = @"^(\.|\?)(#|\?){" + firstGroup.ToString() + @"}(\.|\?)$";
+                        if (Regex.Match(String.Concat(SpringPackage.Skip(i - 1).Take(firstGroup + 2)), pattern).Success)
+                        {
+                            if (remainingGroupOfSprings.Count == 0) result += 1;
+                            else
+                            {
+                                var subSpringPackage = String.Concat(SpringPackage.Skip(firstGroup + 1));
+                                result += CalculatePossibleArrengement2(subSpringPackage, remainingGroupOfSprings);
+                            }
+                        }
+                    }
+                  
+                }
+
+                return result;
             }
 
             public static long CalculatePossibleArrengementAllQuestion(int numberOfQuestionMarks, List<int> GroupOfDamagedSprings)
