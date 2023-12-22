@@ -25,7 +25,9 @@ sw.Start();
 //Day18.Day18_Main();
 //Day19.Day19_Main();
 //Day20.Day20_Main();
-Day21.Day21_Main();
+//Day21.Day21_Main(); //Part 2 should be coded
+//Day22.Day22_Main(); //could be faster, but it works in reasonable time (~80s)
+Day23.Day23_Main();
 sw.Stop();
 
 Console.WriteLine($"Code run under {sw.ElapsedMilliseconds}ms");
