@@ -35,8 +35,11 @@ namespace AoC_2023
             public long CalculatePossibleArrengementWithSelfPart1()
             {
                 //var pattern = CalculatePattern(GroupOfDamagedSprings);
-                //return CalculatePossibleArrengement( SpringPackage, GroupOfDamagedSprings, pattern);
-                return CalculatePossibleArrengement2(SpringPackage, GroupOfDamagedSprings);
+                //var result = CalculatePossibleArrengement( SpringPackage, GroupOfDamagedSprings, pattern);
+
+                var result = CalculatePossibleArrengement2(SpringPackage, GroupOfDamagedSprings);
+                Console.WriteLine(SpringPackage + " : " + result);
+                return result;
             }
 
             public long CalculatePossibleArrengementWithSelfPart2()
@@ -93,39 +96,31 @@ namespace AoC_2023
                 var firstGroup = GroupOfDamagedSprings.First();
                 var remainingGroupOfSprings = GroupOfDamagedSprings.Skip(1).ToList();
 
-                var remainingLength = (remainingGroupOfSprings.Count >0) ? (remainingGroupOfSprings.Sum() + remainingGroupOfSprings.Count - 1) : 0;
+                var remainingLength = (remainingGroupOfSprings.Count >0) ? (remainingGroupOfSprings.Sum() + remainingGroupOfSprings.Count - 1) : -1;
 
                 long result = 0;
                 for(var i = 0; i< SpringPackage.Length - firstGroup - remainingLength; i++)
                 {
-                    
+                    var pattern = @"^(\.|\?)(#|\?){" + firstGroup.ToString() + @"}(\.|\?)$";
+                    var stringToSearch = "";
                     if (i == 0)
                     {
-                        var pattern = @"^(#|\?){" + firstGroup.ToString() + @"}(\.|\?)$";
-                        if (Regex.Match(String.Concat(SpringPackage.Take(firstGroup + 1)), pattern).Success)
-                        {
-                            if (remainingGroupOfSprings.Count == 0) result += 1;
-                            else
-                            {
-                                var subSpringPackage = String.Concat(SpringPackage.Skip(firstGroup + 1));
-                                result += CalculatePossibleArrengement2(subSpringPackage, remainingGroupOfSprings);
-                            }
-                        }
+                        stringToSearch = '.' + String.Concat(SpringPackage.Take(firstGroup + 1));
                     }
                     else
                     {
-                        var pattern = @"^(\.|\?)(#|\?){" + firstGroup.ToString() + @"}(\.|\?)$";
-                        if (Regex.Match(String.Concat(SpringPackage.Skip(i - 1).Take(firstGroup + 2)), pattern).Success)
+                        stringToSearch =  String.Concat(SpringPackage.Skip(i - 1).Take(firstGroup + 2));
+                    }
+                    if (stringToSearch.Length < firstGroup + 2) stringToSearch += '.';
+                    if (Regex.Match(stringToSearch, pattern).Success)
+                    {
+                        if (remainingGroupOfSprings.Count == 0) result += 1;
+                        else
                         {
-                            if (remainingGroupOfSprings.Count == 0) result += 1;
-                            else
-                            {
-                                var subSpringPackage = String.Concat(SpringPackage.Skip(firstGroup + 1));
-                                result += CalculatePossibleArrengement2(subSpringPackage, remainingGroupOfSprings);
-                            }
+                            var subSpringPackage = String.Concat(SpringPackage.Skip(i + firstGroup + 1));
+                            result += CalculatePossibleArrengement2(subSpringPackage, remainingGroupOfSprings);
                         }
                     }
-                  
                 }
 
                 return result;
@@ -195,7 +190,7 @@ namespace AoC_2023
         {
             var input = Day12_ReadInput();
             Console.WriteLine($"Day12 Part1: {Day12_Part1(input)}");
-            Console.WriteLine($"Day12 Part2: {Day12_Part2(input)}");
+            //Console.WriteLine($"Day12 Part2: {Day12_Part2(input)}");
         }
 
         public static Day12_Input Day12_ReadInput(string rawinput = "")
@@ -242,6 +237,11 @@ namespace AoC_2023
         [Theory]
         [InlineData("????????? 1,1,3\r\n...?????????..... 1,1,3\r\n??????? 1,1,1\r\n?????????? 2,1,3\r\n???? 1,1\r\n???????????? 1,1,1\r\n?????????????? 1,1,1\r\n?????????????? 1,1,1,1\r\n?????????????? 1,1,1,1,1", 965)]
         [InlineData("???.### 1,1,3\r\n.??..??...?##. 1,1,3\r\n?#?#?#?#?#?#?#? 1,3,1,6\r\n????.#...#... 4,1,1\r\n????.######..#####. 1,6,5\r\n?###???????? 3,2,1", 21)]
+        [InlineData(".###?..#??????#???? 4,8,1\r\n???.????????#?  1,3,1,1\r\n.#?.??#?????##.# 1,2,1,3,1\r\n?.#????#?????#??#?? 1,6,1,4,1", 30)]
+        [InlineData(".###?..#??????#???? 4,8,1", 3)]
+        [InlineData("???.????????#?  1,3,1,1", 19)]
+        [InlineData(".#?.??#?????##.# 1,2,1,3,1", 3)]
+        [InlineData("?.#????#?????#??#?? 1,6,1,4,1", 5)]
         public static void Day12Part1Test(string rawinput, int expectedValue)
         {
             Assert.Equal(expectedValue, Day12.Day12_Part1(Day12.Day12_ReadInput(rawinput)));
