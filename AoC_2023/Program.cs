@@ -16,7 +16,7 @@ sw.Start();
 //Day09.Day09_Main();
 //Day10.Day10_Main(); // could be faster
 //Day11.Day11_Main(); // could be faster
-//Day12.Day12_Main(); // need to solve
+Day12.Day12_Main(); // need to solve
 //Day13.Day13_Main();
 //Day14.Day14_Main(); //could be faster
 //Day15.Day15_Main();
@@ -28,7 +28,7 @@ sw.Start();
 //Day21.Day21_Main();
 //Day22.Day22_Main(); //could be faster, but it works in reasonable time (~80s)
 //Day23.Day23_Main(); //Part 2 could be faster
-Day24.Day24_Main();
+//Day24.Day24_Main();
 sw.Stop();
 
 Console.WriteLine($"Code run under {sw.ElapsedMilliseconds}ms");

@@ -34,12 +34,7 @@ namespace AoC_2023
 
             public long CalculatePossibleArrengementWithSelfPart1()
             {
-                //var pattern = CalculatePattern(GroupOfDamagedSprings);
-                //var result = CalculatePossibleArrengement( SpringPackage, GroupOfDamagedSprings, pattern);
-
-                var result = CalculatePossibleArrengement2(SpringPackage, GroupOfDamagedSprings);
-                Console.WriteLine(SpringPackage + " : " + result);
-                return result;
+                return CalculatePossibleArrengement2(SpringPackage, GroupOfDamagedSprings); ;
             }
 
             public long CalculatePossibleArrengementWithSelfPart2()
@@ -52,47 +47,18 @@ namespace AoC_2023
                     SpringPackageToTest += "?" + SpringPackage;
                     GroupOfDamagedSpringsToTest.AddRange(GroupOfDamagedSprings);
                 }
-                var pattern = CalculatePattern(GroupOfDamagedSpringsToTest);
-
-                //foreach(var group in GroupOfDamagedSprings)
-                //{
-                //    var subPattern = @"(\.|\?)*";
-                //    subPattern += @"(#|\?){" + group.ToString() + @"}(\.|\?)*";
-                //    //subPattern += @")";
-                //    var matches = Regex.Matches(SpringPackageToTest, subPattern);
-                //    if(matches.Count == 5)
-                //    {
-                //        Console.WriteLine("Heureka");
-                //    }
-                //}
-                return CalculatePossibleArrengement(SpringPackageToTest, GroupOfDamagedSpringsToTest, pattern);
+                return CalculatePossibleArrengement2(SpringPackageToTest, GroupOfDamagedSpringsToTest);
             }
 
-            public static long CalculatePossibleArrengement(string SpringPackage, List<int> GroupOfDamagedSprings, string pattern)
-            {
-                if (SpringPackage.Trim('.').All(f => f == '?')) return CalculatePossibleArrengementAllQuestion(SpringPackage.Trim('.').Length, GroupOfDamagedSprings);
-                if (!IsMatch(SpringPackage, pattern)) return 0;
-                else
-                { 
-                    var placeOfQuestionMark = SpringPackage.IndexOf('?');
-                    if (placeOfQuestionMark == -1) return 1;
-                    else
-                    {
-                        StringBuilder sb = new StringBuilder(SpringPackage);
-                        sb[placeOfQuestionMark] = '.';
-                        long result = CalculatePossibleArrengement(sb.ToString(), GroupOfDamagedSprings, pattern);
-
-                        sb[placeOfQuestionMark] = '#';
-                        result += CalculatePossibleArrengement(sb.ToString(), GroupOfDamagedSprings, pattern);
-
-                        return result;
-                    }
-                }
-            }
-
+            private static Dictionary<(string, string), long> Cache2 = new Dictionary<(string, string), long>();
             public static long CalculatePossibleArrengement2(string SpringPackage, List<int> GroupOfDamagedSprings)
             {
-                if (SpringPackage.Trim('.').All(f => f == '?')) return CalculatePossibleArrengementAllQuestion(SpringPackage.Trim('.').Length, GroupOfDamagedSprings);
+                SpringPackage = SpringPackage.Trim('.');
+                if (SpringPackage.All(f => f == '?')) return CalculatePossibleArrengementAllQuestion(SpringPackage.Length, GroupOfDamagedSprings);
+
+                (string, string) cacheKey = (SpringPackage, string.Join(',', GroupOfDamagedSprings));
+                if(Cache2.ContainsKey(cacheKey)) return Cache2[cacheKey];
+
                 var firstGroup = GroupOfDamagedSprings.First();
                 var remainingGroupOfSprings = GroupOfDamagedSprings.Skip(1).ToList();
 
@@ -101,6 +67,7 @@ namespace AoC_2023
                 long result = 0;
                 for(var i = 0; i< SpringPackage.Length - firstGroup - remainingLength; i++)
                 {
+                    if (i > 0 && SpringPackage.Take(i - 1).Contains('#')) break;
                     var pattern = @"^(\.|\?)(#|\?){" + firstGroup.ToString() + @"}(\.|\?)$";
                     var stringToSearch = "";
                     if (i == 0)
@@ -114,7 +81,11 @@ namespace AoC_2023
                     if (stringToSearch.Length < firstGroup + 2) stringToSearch += '.';
                     if (Regex.Match(stringToSearch, pattern).Success)
                     {
-                        if (remainingGroupOfSprings.Count == 0) result += 1;
+                        if (remainingGroupOfSprings.Count == 0)
+                        {
+                            if (SpringPackage.Skip(i + firstGroup + 1).Contains('#')) result += 0;         
+                           else result += 1;
+                        }
                         else
                         {
                             var subSpringPackage = String.Concat(SpringPackage.Skip(i + firstGroup + 1));
@@ -123,6 +94,7 @@ namespace AoC_2023
                     }
                 }
 
+                if (!Cache2.ContainsKey(cacheKey)) Cache2.Add(cacheKey, result);
                 return result;
             }
 
@@ -148,14 +120,6 @@ namespace AoC_2023
                 if (AllQuestionMarkCache.ContainsKey(cacheKey)) return AllQuestionMarkCache[cacheKey];
                 long result = 0;
 
-                //this is almost working
-                //double result = 1;
-                //for (int i = 0; i < numberOfSpring; i++)
-                //{
-                //    result *= (double)(numberOfQuestionMarks - (numberOfSpring - 1) - i) / (numberOfSpring - i);
-                //}
-                //return (int)result;
-
                 for(var i= 0; i< numberOfQuestionMarks; i++)
                 {
                     result += CalculatePossibleArrengementAllQuestionSimplified(numberOfQuestionMarks - 2 - i, numberOfSpring - 1);
@@ -165,24 +129,6 @@ namespace AoC_2023
                 return result;
                 
             }
-
-            public static bool IsMatch(string SpringPackage, string pattern)
-            {
-                //very slow for some inputs in Part2
-                return Regex.Match(SpringPackage, pattern).Success;
-            }
-
-            public static string CalculatePattern(List<int> GroupOfDamagedSprings)
-            {
-                var pattern = @"^(\.|\?)*";
-                foreach (var group in GroupOfDamagedSprings)
-                {
-                    pattern += @"(#|\?){" + group.ToString() + @"}(\.|\?)+";
-                }
-                pattern = String.Concat(pattern.SkipLast(1));
-                pattern += @"*$";
-                return pattern;
-            }
         }
 
     
@@ -190,7 +136,7 @@ namespace AoC_2023
         {
             var input = Day12_ReadInput();
             Console.WriteLine($"Day12 Part1: {Day12_Part1(input)}");
-            //Console.WriteLine($"Day12 Part2: {Day12_Part2(input)}");
+            Console.WriteLine($"Day12 Part2: {Day12_Part2(input)}");
         }
 
         public static Day12_Input Day12_ReadInput(string rawinput = "")
@@ -219,15 +165,7 @@ namespace AoC_2023
 
         public static long Day12_Part2(Day12_Input input)
         {
-            //return input.Sum(f => f.CalculatePossibleArrengementWithSelfPart2());
-            long result = 0;
-            for(var i= 0; i < input.Count; i++)
-            {
-                Console.Write(i);
-                result += input[i].CalculatePossibleArrengementWithSelfPart2();
-                Console.WriteLine(" - " + result);
-            }
-            return result;
+           return input.Sum(f => f.CalculatePossibleArrengementWithSelfPart2());
         }
 
 
@@ -237,9 +175,9 @@ namespace AoC_2023
         [Theory]
         [InlineData("????????? 1,1,3\r\n...?????????..... 1,1,3\r\n??????? 1,1,1\r\n?????????? 2,1,3\r\n???? 1,1\r\n???????????? 1,1,1\r\n?????????????? 1,1,1\r\n?????????????? 1,1,1,1\r\n?????????????? 1,1,1,1,1", 965)]
         [InlineData("???.### 1,1,3\r\n.??..??...?##. 1,1,3\r\n?#?#?#?#?#?#?#? 1,3,1,6\r\n????.#...#... 4,1,1\r\n????.######..#####. 1,6,5\r\n?###???????? 3,2,1", 21)]
-        [InlineData(".###?..#??????#???? 4,8,1\r\n???.????????#?  1,3,1,1\r\n.#?.??#?????##.# 1,2,1,3,1\r\n?.#????#?????#??#?? 1,6,1,4,1", 30)]
+        [InlineData(".###?..#??????#???? 4,8,1\r\n???.????????#? 1,3,1,1\r\n.#?.??#?????##.# 1,2,1,3,1\r\n?.#????#?????#??#?? 1,6,1,4,1", 30)]
         [InlineData(".###?..#??????#???? 4,8,1", 3)]
-        [InlineData("???.????????#?  1,3,1,1", 19)]
+        [InlineData("???.????????#? 1,3,1,1", 19)]
         [InlineData(".#?.??#?????##.# 1,2,1,3,1", 3)]
         [InlineData("?.#????#?????#??#?? 1,6,1,4,1", 5)]
         public static void Day12Part1Test(string rawinput, int expectedValue)
