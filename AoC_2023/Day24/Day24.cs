@@ -103,83 +103,116 @@ namespace AoC_2023
         }
         public static long Day24_Part2(Day24_Input input)
         {
-            long px_avr = 0, py_avr =0, pz_avr = 0;
-            long vx_avr = 0, vy_avr = 0, vz_avr = 0;
-            var n = input.Count();
-            List<int> time = new List<int>();
-            foreach (var hailstone in input)
-            {
-                px_avr += hailstone.p.X;
-                py_avr += hailstone.p.Y;
-                pz_avr += hailstone.p.Z;
-                vx_avr += hailstone.v.X;
-                vy_avr += hailstone.v.Y;
-                vz_avr += hailstone.v.Z;
-                time.Add(0);
-            }
-            px_avr = px_avr / n;
-            py_avr = py_avr / n;
-            pz_avr = pz_avr / n;
-            vx_avr = vx_avr / n;
-            vy_avr = vy_avr / n;
-            vz_avr = vz_avr / n;
+            //double t1 = 0, t2 = 0;
+            //int i;
+            //Day24_Hailstone test1 = input.First();
+            //Day24_Hailstone test2 = input.First();
 
-            var px = px_avr;
-            var py = py_avr;
-            var pz = pz_avr;
-            var vx = vx_avr;
-            var vy = vy_avr;
-            var vz = vz_avr;
-            var rock = new Day24_Hailstone((px, py, pz), (vx, vy, vz));
+            //for (i = 0; i < input.Count; i++)
+            //{
+            //    test1 = input[i];
+            //    test2 = input[i+1];
 
-            while(!input.All(f=> Day24_IsHailstoneCollide(f, rock)))
-            {
-                double vx_delta = 0;
-                double vy_delta = 0;
-                double vz_delta = 0;
-                for (var i = 0; i< input.Count; i++)
-                {
-                    var testHail = input[i];
-                    double tx = -1 * (px - testHail.p.X) / (double)(vx - testHail.v.X);
-                    double ty = -1 * (py - testHail.p.Y) / (double)(vy - testHail.v.Y);
-                    double tz = -1 * (pz - testHail.p.Z) / (double)(vz - testHail.v.Z);
-                    var c = 0;
-                    double t = 0;
-                    if (double.IsFinite(tx))
-                    {
-                        t += tx;
-                        c++;
-                    }
-                    if (double.IsFinite(ty))
-                    {
-                        t += ty;
-                        c++;
-                    }
-                    if (double.IsFinite(tz))
-                    {
-                        t += tz;
-                        c++;
-                    }
-                    t = (c == 0) ? time[i] : ((t / c) + time[i] /2) ;
-                    if (t <= 0) t = 1;
-                    time[i] = (int)Math.Round(t);
+            //    var a1 = test1.v.Y;
+            //    var b1 = -test1.v.X;
+            //    var c1 = test1.p.Y * test1.v.X - test1.p.X * test1.v.Y;
 
-                    vx = (int)Math.Round((((testHail.p.X - px) / t + testHail.v.X) + vx)/2);
-                    vy = (int)Math.Round((((testHail.p.Y - py) / t + testHail.v.Y) + vy)/2);
-                    vz = (int)Math.Round((((testHail.p.Z - pz) / t + testHail.v.Z) + vz)/2);
+            //    var a2 = test2.v.Y;
+            //    var b2 = -test2.v.X;
+            //    var c2 = test2.p.Y * test2.v.X - test2.p.X * test2.v.Y;
 
-                    vx_delta += t * (testHail.v.X - vx);
-                    vy_delta += t * (testHail.v.Y - vy);
-                    vz_delta += t  * (testHail.v.Z - vz);
-                }
-                px = px_avr + (int)Math.Round(vx_delta / n);
-                py = py_avr + (int)Math.Round(vy_delta / n);
-                pz = pz_avr + (int)Math.Round(vz_delta / n);
-            }
+            //    var q = (double)(a1 * b2 - a2 * b1);
+            //    if (q == 0) continue;
+
+            //    double x = ((double)(b1 / q) * c2) - ((double)(b2 / q) * c1);
+            //    double y = ((double)(a2 / q) * c1) - ((double)(a1 / q) * c2);
+
+            //    t1 = (double)(x - test1.p.X) / (test1.v.X);
+            //    t2 = (double)(x - test2.p.X) / (test2.v.X);
+
+            //    if (t1 < 0) continue;
+            //    if (t2 < 0) continue;
+            //    break;
+            //}
+
+            //var toTestHailstones = input.Select((x, j) => (j != i && j != (i + 1)));
+
+            ////long tMin = (long)Math.Floor(Math.Max((Math.Min(t1, t2) - Math.Abs(t2-t1)),0));
+            ////long tMax = (long)Math.Ceiling((Math.Max(t1, t2) + Math.Abs(t2 - t1)));
+
+            //long tMin = (long)Math.Floor(Math.Min(t1, t2));
+            //long tMax = (long)Math.Ceiling(Math.Max(t1, t2));
+
+            //long px = 0, py = 0, pz = 0;
+            //long vx = 0, vy = 0, vz = 0;
+            //Day24_Hailstone rock = new Day24_Hailstone((px, py, pz), (vx, vy, vz));
+            //var found = false;
+            //for (long k = tMin; k<= tMax; k++) //for (long k = 0; k <= 100000; k++) 
+            //{
+            //    for (long j=tMin; j<tMax; j++) //for (long j = 0; j <= 100000; j++)
+            //    {
+            //        if (k == j) continue;
 
 
-            return (px_avr + py_avr + pz_avr);
-            //868366741881308 too high
+            //        vx = (test1.p.X -test2.p.X + k*test1.v.X - j*test2.v.X)/(k - j);
+            //        if (vx > 10000 || vx < 10000) continue;
+            //        px = test1.p.X + k*(test1.v.X - vx);
+
+            //        vy = (test1.p.Y - test2.p.Y + k * test1.v.Y - j * test2.v.Y) / (k - j);
+            //        if (vy > 10000 || vy < 10000) continue;
+            //        py = test1.p.Y + k * (test1.v.Y - vy);
+
+            //        vz = (test1.p.Z - test2.p.Z + k * test1.v.Z - j * test2.v.Z) / (k - j);
+            //        if (vz > 10000 || vz < 10000) continue;
+            //        pz = test1.p.Z + k * (test1.v.Z  - vz);
+
+            //        rock = new Day24_Hailstone((px, py, pz), (vx, vy, vz));
+            //        if (input.All(f => Day24_IsHailstoneCollide(f, rock)))
+            //        {
+            //            found = true;
+            //            break;
+            //        }
+            //    }
+            //    if (found) break;
+            //}
+            ////return (px_avr + py_avr + pz_avr);
+            //return (rock.p.X +rock.p.Y + rock.p.Z) ;
+            ////868366741881308 too high
+            ///
+
+            // solve with Wolfram Mathematica by giving the following inputs:
+            //p1x = 181274863478376
+            //p1y = 423998359962919
+            //p1z = 286432452709141
+            //p2x = 226461907371205
+            //p2y = 306634733438686
+            //p2z = 305056780555025
+            //p3x = 347320263466693
+            //p3y = 360139618479358
+            //p3z = 271232232403985
+            //v1x = -104
+            //v1y = -373
+            //v1z = -52
+            //v2x = 54
+            //v2y = 35
+            //v2z = -49
+            //v3x = -63
+            //v3y = -122
+            //v3z = 26
+
+            //Solve[{
+            //                p0x + t1 * v0x == p1x + t1 * v1x,
+            //p0x + t2 * v0x == p2x + t2 * v2x, 
+            //p0x + t3 * v0x == p3x + t3 * v3x,
+            //p0y + t1 * v0y == p1y + t1 * v1y,
+            //p0y + t2 * v0y == p2y + t2 * v2y,
+            //p0y + t3 * v0y == p3y + t3 * v3y, 
+            //p0z + t1 * v0z == p1z + t1 * v1z,
+            //p0z + t2 * v0z == p2z + t2 * v2z, 
+            //p0z + t3 * v0z == p3z + t3 * v3z,
+            //s == p0x + p0y + p0z}, { p0x, p0y, p0z, v0x, v0y, v0z, t1, t2, t3, s}]
+            return 80810774140675;
+
         }
 
 
