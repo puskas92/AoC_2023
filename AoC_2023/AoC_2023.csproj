@@ -63,6 +63,7 @@
     <None Remove="Day22\Day22_input.txt" />
     <None Remove="Day23\Day23_input.txt" />
     <None Remove="Day24\Day24_input.txt" />
+    <None Remove="Day25\Day25_input.txt" />
   </ItemGroup>
 
 </Project>
